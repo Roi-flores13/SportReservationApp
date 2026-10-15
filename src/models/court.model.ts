@@ -1,12 +1,14 @@
-import { Schema, model } from "mongoose";
+import { InferSchemaType, Schema, model } from "mongoose";
 
 const courtSchema = new Schema(
   {
-    name: {
-      type: String,
+    installationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Installation",
       required: true,
-      trim: true,
+      index: true,
     },
+    name: { type: String, required: true, trim: true, maxlength: 100 },
     sport: {
       type: String,
       required: true,
@@ -17,7 +19,10 @@ const courtSchema = new Schema(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
+courtSchema.index({ installationId: 1, name: 1 }, { unique: true });
+
+export type CourtDocument = InferSchemaType<typeof courtSchema>;
 export const Court = model("Court", courtSchema);
