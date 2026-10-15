@@ -13,6 +13,7 @@ API backend para que pequeños negocios deportivos administren instalaciones, ca
 
 ```bash
 docker compose up --build -d
+npm start
 ```
 
 La API queda disponible en `http://localhost:3000`. Para detenerla: `docker compose down`.
