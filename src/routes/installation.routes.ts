@@ -5,5 +5,6 @@ export const installationRoutes = Router();
 installationRoutes.post("/", installationController.create);
 installationRoutes.get("/", installationController.list);
 installationRoutes.get("/:id", installationController.get);
+installationRoutes.get("/:id/weather", installationController.getWeather);
 installationRoutes.patch("/:id", installationController.update);
 installationRoutes.delete("/:id", installationController.remove);

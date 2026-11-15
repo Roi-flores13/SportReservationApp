@@ -13,6 +13,12 @@ export const timeSlotRepository = {
       "courtId",
       "name sport installationId"
     ),
+  claimAvailableSlot: (id: string) =>
+    TimeSlot.findOneAndUpdate(
+      { _id: id, status: "AVAILABLE" },
+      { status: "RESERVED" },
+      { new: true, runValidators: true }
+    ),
   deleteById: (id: string) => TimeSlot.findByIdAndDelete(id),
   existsByCourt: (courtId: string) => TimeSlot.exists({ courtId }),
 };

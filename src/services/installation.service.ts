@@ -2,6 +2,7 @@ import { AppError } from "../errors/app-error";
 import { courtRepository } from "../repositories/court.repository";
 import { installationRepository } from "../repositories/installation.repository";
 import { requireObjectId, requireText } from "../utils/validation";
+import { weatherService } from "./weather.service";
 
 function installationData(body: Record<string, unknown>, partial = false) {
   const data: Record<string, unknown> = {};
@@ -28,6 +29,23 @@ export const installationService = {
     const item = await installationRepository.findById(id);
     if (!item) throw new AppError(404, "Instalacion no encontrada");
     return item;
+  },
+  async getWeather(id: string) {
+    const installation = await this.get(id);
+    const weather = await weatherService.getCurrentWeather(
+      installation.latitude,
+      installation.longitude
+    );
+    return {
+      installation: {
+        _id: installation._id,
+        name: installation.name,
+        address: installation.address,
+        latitude: installation.latitude,
+        longitude: installation.longitude,
+      },
+      weather,
+    };
   },
   async update(id: string, body: Record<string, unknown>) {
     requireObjectId(id);

@@ -11,6 +11,9 @@ export const installationController = {
   async get(req: Request, res: Response, next: NextFunction) {
     try { res.json(await installationService.get(req.params.id)); } catch (error) { next(error); }
   },
+  async getWeather(req: Request, res: Response, next: NextFunction) {
+    try { res.json(await installationService.getWeather(req.params.id)); } catch (error) { next(error); }
+  },
   async update(req: Request, res: Response, next: NextFunction) {
     try { res.json(await installationService.update(req.params.id, req.body)); } catch (error) { next(error); }
   },

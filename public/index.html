@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SportBook - Reservaciones Deportivas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <!-- Navbar -->
+  <header class="bg-slate-900 text-white shadow">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <h1 class="text-xl font-bold tracking-tight">SportBook</h1>
+        <p class="text-xs text-slate-400">Sistema de Reservaciones Deportivas — Entrega 2</p>
+      </div>
+      <div id="user-bar" class="hidden items-center gap-3 text-sm">
+        <span id="user-badge" class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700"></span>
+        <button id="btn-logout" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs font-medium">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <!-- Banner de alertas / respuestas de la API -->
+    <div id="alert-box" class="hidden rounded-lg p-4 text-sm font-medium border"></div>
+
+    <!-- SECCIÓN 1: Autenticación (Login / Registro) -->
+    <section id="auth-section" class="grid md:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-lg font-bold mb-4">Iniciar Sesión</h2>
+        <form id="form-login" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Correo electrónico</label>
+            <input type="email" name="email" required placeholder="roi@iteso.mx"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contraseña</label>
+            <input type="password" name="password" required placeholder="••••••"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+          </div>
+          <button type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-sm">
+            Entrar
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-lg font-bold mb-4">Crear Cuenta</h2>
+        <form id="form-register" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nombre completo</label>
+            <input type="text" name="name" required placeholder="Roi Flores"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Correo electrónico</label>
+            <input type="email" name="email" required placeholder="roi@iteso.mx"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contraseña (mín. 6)</label>
+              <input type="password" name="password" required minlength="6" placeholder="123456"
+                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Rol</label>
+              <select name="role" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+                <option value="CLIENT">CLIENT (Cliente)</option>
+                <option value="ADMIN">ADMIN (Administrador)</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit"
+            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-sm">
+            Registrarme
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: Dashboard Principal (visible al iniciar sesión) -->
+    <section id="app-section" class="hidden space-y-8">
+      <!-- Paso 1: Sedes + Clima Open-Meteo -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-lg font-bold">1. Instalaciones Deportivas y Clima en Tiempo Real</h2>
+            <p class="text-xs text-slate-500">Selecciona una instalación para ver sus canchas o consultar el clima actual con Open-Meteo</p>
+          </div>
+          <button id="btn-refresh-all" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded font-medium">
+            Actualizar datos
+          </button>
+        </div>
+        <div id="installations-list" class="grid md:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- Paso 2: Canchas y Horarios Disponibles -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h2 class="text-lg font-bold mb-1">2. Canchas</h2>
+          <p id="selected-inst-label" class="text-xs text-slate-500 mb-4">Mostrando todas las canchas</p>
+          <div id="courts-list" class="space-y-3"></div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h2 class="text-lg font-bold mb-1">3. Horarios de 1 Hora (TimeSlots)</h2>
+          <p id="selected-court-label" class="text-xs text-slate-500 mb-4">Selecciona una cancha para filtrar sus horarios</p>
+          <div id="timeslots-list" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- Paso 3: Reservaciones del Usuario / Historial -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-lg font-bold mb-1">4. Mis Reservaciones e Historial</h2>
+        <p class="text-xs text-slate-500 mb-4">
+          Al cancelar una reservación, su estado pasa a CANCELLED para conservar el historial y el horario vuelve a estar AVAILABLE.
+        </p>
+        <div id="reservations-list" class="space-y-3"></div>
+      </div>
+
+      <!-- Panel de Administración (Catálogos) -->
+      <div id="admin-panel" class="bg-slate-100 p-6 rounded-xl border border-slate-300 space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Panel de Administración de Catálogos</h2>
+          <p class="text-xs text-slate-600">Alta rápida de Instalaciones, Canchas y Horarios de 60 minutos</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <!-- Crear Instalación -->
+          <form id="form-installation" class="bg-white p-4 rounded-lg border border-slate-200 space-y-3">
+            <h3 class="font-bold text-sm">Nueva Instalación</h3>
+            <input type="text" name="name" required placeholder="Nombre (ej. Futcenter Bugambilias)"
+              class="w-full border rounded px-2.5 py-1.5 text-sm" />
+            <input type="text" name="address" required placeholder="Dirección completa"
+              class="w-full border rounded px-2.5 py-1.5 text-sm" />
+            <div class="grid grid-cols-2 gap-2">
+              <input type="number" step="any" name="latitude" required placeholder="Lat (20.60)"
+                value="20.6084" class="w-full border rounded px-2.5 py-1.5 text-sm" />
+              <input type="number" step="any" name="longitude" required placeholder="Lon (-103.41)"
+                value="-103.4146" class="w-full border rounded px-2.5 py-1.5 text-sm" />
+            </div>
+            <button type="submit" class="w-full bg-slate-900 text-white py-1.5 rounded text-sm font-medium">
+              Crear Instalación
+            </button>
+          </form>
+
+          <!-- Crear Cancha -->
+          <form id="form-court" class="bg-white p-4 rounded-lg border border-slate-200 space-y-3">
+            <h3 class="font-bold text-sm">Nueva Cancha</h3>
+            <select id="select-court-installation" name="installationId" required
+              class="w-full border rounded px-2.5 py-1.5 text-sm bg-white"></select>
+            <input type="text" name="name" required placeholder="Nombre (ej. Cancha Norte)"
+              class="w-full border rounded px-2.5 py-1.5 text-sm" />
+            <select name="sport" required class="w-full border rounded px-2.5 py-1.5 text-sm bg-white">
+              <option value="futbol">Fútbol</option>
+              <option value="padel">Pádel</option>
+              <option value="tenis">Tenis</option>
+            </select>
+            <button type="submit" class="w-full bg-slate-900 text-white py-1.5 rounded text-sm font-medium">
+              Crear Cancha
+            </button>
+          </form>
+
+          <!-- Crear Horario de 1 hora -->
+          <form id="form-timeslot" class="bg-white p-4 rounded-lg border border-slate-200 space-y-3">
+            <h3 class="font-bold text-sm">Nuevo Horario (1 hora exacta)</h3>
+            <select id="select-slot-court" name="courtId" required
+              class="w-full border rounded px-2.5 py-1.5 text-sm bg-white"></select>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Inicio (se calculará +1h automático)</label>
+              <input type="datetime-local" name="startLocal" required
+                class="w-full border rounded px-2.5 py-1.5 text-sm" />
+            </div>
+            <button type="submit" class="w-full bg-slate-900 text-white py-1.5 rounded text-sm font-medium">
+              Publicar Horario
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

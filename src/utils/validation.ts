@@ -12,6 +12,15 @@ export function requireText(value: unknown, field: string): string {
   return value.trim();
 }
 
+export function requireEmail(value: unknown, field = "email"): string {
+  const email = requireText(value, field).toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new AppError(400, `${field} no tiene un formato de correo valido`);
+  }
+  return email;
+}
+
 export function parseDate(value: unknown, field: string): Date {
   if (typeof value !== "string") throw new AppError(400, `${field} debe ser una fecha ISO 8601`);
   const date = new Date(value);

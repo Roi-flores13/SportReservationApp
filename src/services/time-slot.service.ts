@@ -1,7 +1,10 @@
 import { AppError } from "../errors/app-error";
 import { courtRepository } from "../repositories/court.repository";
+import { reservationRepository } from "../repositories/reservation.repository";
 import { timeSlotRepository } from "../repositories/time-slot.repository";
 import { parseDate, requireObjectId, requireText } from "../utils/validation";
+
+const VALID_STATUSES = ["AVAILABLE", "RESERVED", "BLOCKED"];
 
 async function timeSlotData(body: Record<string, unknown>, partial = false) {
   const data: Record<string, unknown> = {};
@@ -21,7 +24,7 @@ async function timeSlotData(body: Record<string, unknown>, partial = false) {
   }
   if (body.status !== undefined) {
     if (body.status !== "AVAILABLE" && body.status !== "BLOCKED") {
-      throw new AppError(400, "status debe ser AVAILABLE o BLOCKED");
+      throw new AppError(400, "status manual debe ser AVAILABLE o BLOCKED");
     }
     data.status = body.status;
   }
@@ -32,8 +35,8 @@ export const timeSlotService = {
   create: async (body: Record<string, unknown>) => timeSlotRepository.create(await timeSlotData(body)),
   list: (courtId?: string, status?: string) => {
     if (courtId) requireObjectId(courtId, "courtId");
-    if (status && status !== "AVAILABLE" && status !== "BLOCKED") {
-      throw new AppError(400, "status debe ser AVAILABLE o BLOCKED");
+    if (status && !VALID_STATUSES.includes(status)) {
+      throw new AppError(400, "status debe ser AVAILABLE, RESERVED o BLOCKED");
     }
     return timeSlotRepository.findAll(courtId, status);
   },
@@ -47,6 +50,9 @@ export const timeSlotService = {
     requireObjectId(id);
     const current = await timeSlotRepository.findById(id);
     if (!current) throw new AppError(404, "Horario no encontrado");
+    if (current.status === "RESERVED") {
+      throw new AppError(409, "No se puede modificar directamente un horario con reservacion activa");
+    }
     const data = await timeSlotData(body, true);
     const start = (data.startTime as Date | undefined) ?? current.startTime;
     const end = (data.endTime as Date | undefined) ?? current.endTime;
@@ -57,6 +63,9 @@ export const timeSlotService = {
   },
   async remove(id: string) {
     requireObjectId(id);
+    if (await reservationRepository.existsByTimeSlot(id)) {
+      throw new AppError(409, "No se puede eliminar un horario que tiene historial de reservaciones");
+    }
     const item = await timeSlotRepository.deleteById(id);
     if (!item) throw new AppError(404, "Horario no encontrado");
   },

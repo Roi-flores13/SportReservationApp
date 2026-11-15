@@ -7,7 +7,7 @@ const timeSlotSchema = new Schema(
     endTime: { type: Date, required: true },
     status: {
       type: String,
-      enum: ["AVAILABLE", "BLOCKED"],
+      enum: ["AVAILABLE", "BLOCKED", "RESERVED"],
       default: "AVAILABLE",
     },
   },
