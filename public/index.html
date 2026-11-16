@@ -62,20 +62,14 @@
             <input type="email" name="email" required placeholder="roi@iteso.mx"
               class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contraseña (mín. 6)</label>
-              <input type="password" name="password" required minlength="6" placeholder="123456"
-                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Rol</label>
-              <select name="role" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
-                <option value="CLIENT">CLIENT (Cliente)</option>
-                <option value="ADMIN">ADMIN (Administrador)</option>
-              </select>
-            </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contraseña (mín. 6)</label>
+            <input type="password" name="password" required minlength="6" placeholder="123456"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" />
           </div>
+          <p class="text-xs text-slate-500">
+            Las cuentas creadas desde este formulario se registran como clientes.
+          </p>
           <button type="submit"
             class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-sm">
             Registrarme

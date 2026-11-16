@@ -20,6 +20,10 @@ export const reservationService = {
       throw new AppError(409, "El horario no esta disponible para reservar");
     }
 
+    if (new Date(slot.startTime).getTime() <= Date.now()) {
+      throw new AppError(409, "No se puede reservar un horario que ya paso");
+    }
+
     // Verificar que la cancha y la sede estén activas
     const courtIdObj = slot.courtId as unknown as { _id?: unknown };
     const courtIdStr = String(courtIdObj._id ?? slot.courtId);

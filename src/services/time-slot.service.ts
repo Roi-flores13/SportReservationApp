@@ -16,6 +16,9 @@ async function timeSlotData(body: Record<string, unknown>, partial = false) {
   }
   const start = body.startTime !== undefined ? parseDate(body.startTime, "startTime") : undefined;
   const end = body.endTime !== undefined ? parseDate(body.endTime, "endTime") : undefined;
+  if (start && start.getTime() <= Date.now()) {
+    throw new AppError(400, "startTime debe estar en el futuro");
+  }
   if (!partial || start) data.startTime = start;
   if (!partial || end) data.endTime = end;
   if (!partial && (!start || !end)) throw new AppError(400, "startTime y endTime son obligatorios");
@@ -56,6 +59,9 @@ export const timeSlotService = {
     const data = await timeSlotData(body, true);
     const start = (data.startTime as Date | undefined) ?? current.startTime;
     const end = (data.endTime as Date | undefined) ?? current.endTime;
+    if (start.getTime() <= Date.now()) {
+      throw new AppError(400, "startTime debe estar en el futuro");
+    }
     if (end.getTime() - start.getTime() !== 60 * 60 * 1000) {
       throw new AppError(400, "El horario debe durar exactamente una hora");
     }

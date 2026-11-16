@@ -18,7 +18,11 @@ declare global {
 }
 
 export function getJwtSecret(): string {
-  return process.env.JWT_SECRET ?? "sportbook_super_secret_key_2026";
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("JWT_SECRET debe existir y tener al menos 32 caracteres");
+  }
+  return secret;
 }
 
 export function authenticate(req: Request, _res: Response, next: NextFunction): void {

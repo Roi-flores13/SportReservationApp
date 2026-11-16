@@ -15,14 +15,6 @@ export const authService = {
       throw new AppError(400, "password debe tener al menos 6 caracteres");
     }
 
-    let role: "CLIENT" | "ADMIN" = "CLIENT";
-    if (body.role !== undefined) {
-      if (body.role !== "CLIENT" && body.role !== "ADMIN") {
-        throw new AppError(400, "role debe ser CLIENT o ADMIN");
-      }
-      role = body.role;
-    }
-
     const existing = await userRepository.findByEmail(email);
     if (existing) {
       throw new AppError(409, "Ya existe un usuario con ese correo");
@@ -33,7 +25,7 @@ export const authService = {
       name,
       email,
       password: hashedPassword,
-      role,
+      role: "CLIENT",
     });
 
     const token = jwt.sign(

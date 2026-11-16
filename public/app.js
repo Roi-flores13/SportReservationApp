@@ -11,6 +11,7 @@ const authSection = document.getElementById("auth-section");
 const appSection = document.getElementById("app-section");
 const userBar = document.getElementById("user-bar");
 const userBadge = document.getElementById("user-badge");
+const adminPanel = document.getElementById("admin-panel");
 
 function showAlert(message, isError = false) {
   alertBox.textContent = message;
@@ -60,11 +61,13 @@ function renderSessionUI() {
     userBar.classList.remove("hidden");
     userBar.classList.add("flex");
     userBadge.textContent = `${state.user.name} (${state.user.role})`;
+    adminPanel.classList.toggle("hidden", state.user.role !== "ADMIN");
     loadAllData();
   } else {
     authSection.classList.remove("hidden");
     appSection.classList.add("hidden");
     userBar.classList.add("hidden");
+    adminPanel.classList.add("hidden");
   }
 }
 
@@ -211,9 +214,14 @@ async function loadTimeSlots() {
       });
       const end = new Date(slot.endTime).toLocaleTimeString("es-MX", { timeStyle: "short" });
       const courtName = slot.courtId?.name || "Cancha";
+      const isPast = new Date(slot.startTime).getTime() <= Date.now();
+      const canReserve = slot.status === "AVAILABLE" && !isPast;
+      const visibleStatus = isPast ? "VENCIDO" : slot.status;
 
       const badgeColor =
-        slot.status === "AVAILABLE"
+        isPast
+          ? "bg-slate-200 text-slate-700"
+          : slot.status === "AVAILABLE"
           ? "bg-emerald-100 text-emerald-800"
           : slot.status === "RESERVED"
           ? "bg-amber-100 text-amber-800"
@@ -226,18 +234,20 @@ async function loadTimeSlots() {
           <p class="text-xs text-slate-600">${start} — ${end}</p>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-[11px] font-bold px-2 py-0.5 rounded ${badgeColor}">${slot.status}</span>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded ${badgeColor}">${visibleStatus}</span>
           ${
-            slot.status === "AVAILABLE"
+            canReserve
               ? `<button onclick="reserveSlot('${slot._id}')"
                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded font-semibold">
                    Reservar
                  </button>`
-              : `<button onclick="reserveSlot('${slot._id}')"
+              : !isPast && slot.status === "RESERVED"
+              ? `<button onclick="reserveSlot('${slot._id}')"
                    class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-2.5 py-1.5 rounded font-medium"
                    title="Probar validación 409 Conflict">
                    Probar 409
                  </button>`
+              : ""
           }
         </div>
       </div>`;

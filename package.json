@@ -4,7 +4,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "verify:first-delivery": "npm run build && node scripts/verify-first-delivery.mjs"
+    "verify:first-delivery": "npm run build && node scripts/verify-first-delivery.mjs",
+    "verify:second-delivery": "npm run build && node scripts/verify-second-delivery.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
